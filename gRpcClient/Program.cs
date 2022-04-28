@@ -1,4 +1,5 @@
 ﻿
+using Grpc.Core;
 using Grpc.Net.Client;
 using GrpcService1;
 
@@ -8,7 +9,7 @@ namespace GrpcClient
     {
         static async Task Main(string[] args)
         {
-            var channel = GrpcChannel.ForAddress("http://localhost:49160");
+            var channel = GrpcChannel.ForAddress("http://localhost:49162");
             var customerClient = new Customer.CustomerClient(channel);
 
             var rnd = new Random();
@@ -19,6 +20,21 @@ namespace GrpcClient
                 var reply = await customerClient.GetCustomerInfoAsync(clientRequested);
                 Console.WriteLine($"{reply.FirstName} {reply.LastName}");
             }
+
+            Console.WriteLine();
+            Console.WriteLine("New Customer List");
+            Console.WriteLine();
+
+            // New Customers
+            using (var call = customerClient.GetNewCustomers(new NewCustomerRequest()))
+            {
+                while (await call.ResponseStream.MoveNext())
+                {
+                    var currentCustomer = call.ResponseStream.Current;
+                    Console.WriteLine($"{currentCustomer.FirstName} {currentCustomer.LastName} {currentCustomer.EmailAddress}");
+                }
+            }
+
             Console.ReadLine();
         }
     }

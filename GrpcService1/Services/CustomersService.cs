@@ -10,7 +10,7 @@ namespace GrpcService1.Services
             this.logger = logger;
         }
 
-        public override Task<CustomerModel> GetCustomerInfo(CustomerLookupModel request, ServerCallContext context)
+        public override async Task<CustomerModel> GetCustomerInfo(CustomerLookupModel request, ServerCallContext context)
         {
             CustomerModel output = new CustomerModel();
 
@@ -30,7 +30,44 @@ namespace GrpcService1.Services
                 output.LastName = "Thomas";
             }
 
-            return Task.FromResult(output);
+            return await Task.FromResult(output);
+        }
+
+        public override async Task GetNewCustomers(NewCustomerRequest request, IServerStreamWriter<CustomerModel> responseStream, ServerCallContext context)
+        {
+            List<CustomerModel> customers = new List<CustomerModel>()
+            {
+                new CustomerModel()
+                {
+                    FirstName = "Rui",
+                    LastName = "Vilela",
+                    EmailAddress = "rui@t.pt",
+                    Age =42,
+                    IsAlive = true,
+                },
+                new CustomerModel()
+                {
+                    FirstName="Sue",
+                    LastName="Storm",
+                    EmailAddress="sue@t.pt",
+                    Age=40,
+                    IsAlive=false,
+                },
+                new CustomerModel()
+                {
+                    FirstName= "Bilbo",
+                    LastName = "Beggins",
+                    EmailAddress="bilbo@t.pt",
+                    Age = 110,
+                    IsAlive=false,
+                }
+            };
+
+            foreach (var customer in customers)
+            {
+                await Task.Delay(1000); // simulated processing
+                await responseStream.WriteAsync(customer);
+            }
         }
     }
 }
