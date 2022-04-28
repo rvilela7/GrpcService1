@@ -1,6 +1,6 @@
-﻿using Grpc.Net.Client;
+﻿
+using Grpc.Net.Client;
 using GrpcService1;
-using System;
 
 namespace GrpcClient
 {
@@ -8,21 +8,18 @@ namespace GrpcClient
     {
         static async Task Main(string[] args)
         {
-            var channel = GrpcChannel.ForAddress("http://localhost:49154/");
-            var client = new Greeter.GreeterClient(channel);
-            var input = new HelloRequest { Name = "Maria" };
-            var reply = await client.SayHelloAsync(input);
+            var channel = GrpcChannel.ForAddress("http://localhost:49160");
+            var customerClient = new Customer.CustomerClient(channel);
 
-            Console.WriteLine(reply.Message);
+            var rnd = new Random();
 
+            for (int i = 0; i < 10; i++)
+            {
+                var clientRequested = new CustomerLookupModel() { UserId = rnd.Next(3) + 1 };
+                var reply = await customerClient.GetCustomerInfoAsync(clientRequested);
+                Console.WriteLine($"{reply.FirstName} {reply.LastName}");
+            }
             Console.ReadLine();
         }
     }
 }
-
-// Nuggets
-// Google.protobuf
-// Grpc.net.client
-// Grpc.tools
-
-// Property files for *proto (Client only)
